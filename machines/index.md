@@ -5,6 +5,7 @@ Solo contenido publicable · sin flags, hashes ni contraseñas reales.
 
 [:fontawesome-brands-github: Repositorio](https://github.com/SPROMbash/htb-writeups){ .md-button }
 [:fontawesome-solid-tags: Explorar por etiquetas](tags.md){ .md-button }
+[:fontawesome-solid-gears: Cómo está hecha esta web](how-it-works.md){ .md-button }
 
 ## Máquinas
 
