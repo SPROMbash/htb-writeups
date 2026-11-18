@@ -1,0 +1,3 @@
+# Carpeta para las capturas de Responder (web → prueba del vector → acceso → flag).
+# Sustituye este archivo cuando añadas imágenes; en el writeup se referencian así:
+#   ![Prueba de LFI](images/02-lfi.png)

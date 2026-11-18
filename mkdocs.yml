@@ -1,0 +1,77 @@
+site_name: HTB Writeups — SPROMbash
+site_description: Writeups de máquinas de Hack The Box (Starting Point y retiradas).
+site_author: Tecén Díaz Quintana
+site_url: https://sprombash.github.io/htb-writeups/
+
+repo_name: SPROMbash/htb-writeups
+repo_url: https://github.com/SPROMbash/htb-writeups
+
+# Los writeups viven en la raíz del repo (machines/). MkDocs construye la web
+# directamente desde ahí, así que GitHub y la web comparten los mismos archivos.
+docs_dir: machines
+
+theme:
+  name: material
+  language: es
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Cambiar a modo oscuro
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Cambiar a modo claro
+  features:
+    - navigation.instant      # carga instantánea (SPA)
+    - navigation.tracking
+    - navigation.indexes      # permite que README.md sea el índice de cada máquina
+    - navigation.top
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy       # botón de copiar en cada bloque de código
+    - content.tooltips
+  icon:
+    repo: fontawesome/brands/github
+
+# Nota: NO definimos 'nav:' a propósito. Así MkDocs genera el menú
+# automáticamente desde la estructura de carpetas: añadir machines/<maquina>/
+# hace que aparezca sola en la web. Ese es el comportamiento "recursivo".
+
+plugins:
+  - search:
+      lang: es
+  - tags                        # agrupa los writeups por etiqueta; el índice va en tags.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:          # habilita los iconos :fontawesome-...: y :material-...:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/SPROMbash
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/TU-PERFIL   # <-- cambia por tu URL real de LinkedIn

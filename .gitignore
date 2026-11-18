@@ -1,0 +1,16 @@
+# Salida de compilación de MkDocs
+site/
+_site/
+.cache/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Seguridad: esto NUNCA debe subirse a un repo público
+*.ovpn
+.env
+*.env
+secrets*

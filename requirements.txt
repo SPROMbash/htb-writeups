@@ -1,0 +1,3 @@
+# MkDocs Material trae de serie mkdocs, el buscador, los plugins de tags,
+# el resaltado de sintaxis (pymdownx) y los iconos. Con esto basta.
+mkdocs-material>=9.5
