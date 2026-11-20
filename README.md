@@ -3,7 +3,7 @@
 Writeups of **Hack The Box** machines (Starting Point and retired), documented step by step.
 
 🌐 **Website:** https://sprombash.github.io/htb-writeups/
-💼 **LinkedIn:** _(add your link)_
+💼 **LinkedIn:** www.linkedin.com/in/tecen-diaz
 
 > Publishable content only. No real flags, hashes or passwords — always `<REDACTED>` or the location.
 
