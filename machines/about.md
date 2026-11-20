@@ -5,23 +5,21 @@ hide:
 ---
 
 <!--
-  Página de presentación. Sustituye lo que está [ENTRE CORCHETES] por tus datos.
-  Todo lo demás describe el proyecto, no a ti.
+  Página de presentación: datos de contacto arriba y descripción del proyecto debajo.
 -->
 
 <div class="htb-profile" markdown>
-<div class="htb-profile__avatar" aria-hidden="true">[INICIALES]</div>
+<div class="htb-profile__avatar" aria-hidden="true">SP</div>
 <div class="htb-profile__body" markdown>
 <p class="htb-eyebrow">whoami</p>
 
-# [TU NOMBRE]
+# SpromBash
 
-[UNA LÍNEA SOBRE TI: a qué te dedicas o qué estudias, y qué te interesa de la ciberseguridad.]
+También firmo como **SPROM**: es mi usuario de hacking y de proyectos de ciberseguridad.
 
 <ul class="htb-profile__links">
-  <li><strong>GitHub</strong> · [ENLACE A TU GITHUB]</li>
-  <li><strong>LinkedIn</strong> · [ENLACE A TU LINKEDIN]</li>
-  <li><strong>Otro enlace</strong> · [OPCIONAL: web, blog o contacto]</li>
+  <li><strong>GitHub</strong> · <a href="https://github.com/SPROMbash">github.com/SpromBash</a></li>
+  <li><strong>LinkedIn</strong> · <a href="https://www.linkedin.com/in/tecen-diaz">linkedin.com/in/tecen-diaz</a></li>
 </ul>
 </div>
 </div>

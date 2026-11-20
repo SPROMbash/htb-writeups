@@ -1,9 +1,9 @@
-site_name: HTB Writeups — SPROMbash
+site_name: HTB Writeups — SpromBash
 site_description: Writeups de máquinas de Hack The Box (Starting Point y retiradas).
 site_author: Tecén Díaz Quintana
 site_url: https://sprombash.github.io/htb-writeups/
 
-repo_name: SPROMbash/htb-writeups
+repo_name: SpromBash/htb-writeups   # solo la etiqueta visible; la URL real va en repo_url
 repo_url: https://github.com/SPROMbash/htb-writeups
 
 # Los writeups viven en la raíz del repo (machines/). MkDocs construye la web
@@ -97,4 +97,6 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/SPROMbash
     - icon: fontawesome/brands/linkedin
-      link: https://www.linkedin.com/in/TU-PERFIL   # <-- cambia por tu URL real de LinkedIn
+      link: https://www.linkedin.com/in/tecen-diaz
+  # Firma que aparece en la cabecera de cada writeup (overrides/partials/tags.html)
+  htb_author: SPROM

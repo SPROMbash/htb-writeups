@@ -668,7 +668,8 @@ kbd.htb-kbd-shortcut,
   border-radius: 1rem;
   background: var(--htb-accent-soft);
   color: var(--htb-accent);
-  font: 700 .7rem var(--htb-display);
+  font: 700 1.4rem var(--htb-display);
+  letter-spacing: .02em;
   text-align: center;
   line-height: 1.1;
 }
@@ -878,3 +879,6 @@ kbd.htb-kbd-shortcut,
 /* Sprite de iconos: presente en el DOM (para <use>) pero invisible */
 .htb-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 .md-typeset table.htb-matrix tbody th, .md-typeset table.htb-matrix thead th:first-child { width: 1%; }
+
+/* Firma del autor en la cabecera del writeup */
+.htb-badge--author { color: var(--htb-accent); background: var(--htb-accent-soft); font-family: var(--htb-mono); font-weight: 500; }

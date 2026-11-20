@@ -33,6 +33,12 @@
       {{ badge(h.difficulty, "htb-d--" ~ h.diff_class, home ~ '?difficulty=' ~ (h.difficulty | urlencode) ~ '#maquinas') }}
       {% if h.platform %}{{ badge(h.platform, "htb-badge--plain", home ~ '?q=' ~ (h.platform | urlencode) ~ '#maquinas') }}{% endif %}
       <span class="htb-badge htb-badge--plain">Hack The Box</span>
+      {% if config.extra.htb_author %}
+        <span class="htb-badge htb-badge--author" title="Autor del writeup">
+          {% include ".icons/material/account-outline.svg" %}
+          por {{ config.extra.htb_author }}
+        </span>
+      {% endif %}
       {% if h.date %}
         <span class="htb-badge htb-badge--plain">
           {% include ".icons/material/calendar-blank-outline.svg" %}
