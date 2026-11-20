@@ -4,6 +4,8 @@ tags:
   - Windows
   - Very Easy
   - Starting Point
+date: 2026-11-18
+techniques: LFI · captura NTLM · WinRM
 ---
 
 # Responder — Hack The Box (Starting Point · Tier 1)

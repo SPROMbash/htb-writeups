@@ -13,11 +13,15 @@ Fuente de verdad única: los archivos en `machines/`. GitHub y la web leen de ah
 ```
 htb-writeups/
 ├── machines/
-│   ├── index.md            # portada de la web (tabla de máquinas)
+│   ├── index.md            # portada (hero; la rejilla y las stats se generan solas)
+│   ├── about.md            # página "Sobre mí"
+│   ├── how-it-works.md     # cómo está hecha la web
 │   ├── tags.md             # índice de etiquetas (SO, dificultad)
 │   └── <maquina>/
-│       ├── README.md       # el writeup (con front-matter: title + tags)
+│       ├── README.md       # el writeup (front-matter: title, tags, date, techniques)
 │       └── images/         # capturas de esa máquina
+├── hooks/machines.py       # lee el front-matter y genera rejilla, stats y paleta Ctrl+K
+├── overrides/              # plantillas propias de Material + CSS/JS del diseño
 ├── mkdocs.yml              # configuración de la web
 ├── requirements.txt
 ├── .github/workflows/deploy.yml   # despliegue automático
@@ -37,11 +41,14 @@ Cuando el usuario diga "añade el writeup de `<maquina>`" y te dé el contenido
      - <SO: Windows | Linux>
      - <Dificultad: Very Easy | Easy | Medium | Hard | Insane>
      - <Starting Point | Retired>
+   date: <AAAA-MM-DD>          # fecha de publicación (línea de tiempo y badges)
+   techniques: <Técnica · Técnica · Técnica>   # se muestra en la tarjeta
    ---
    ```
 3. Pega el writeup tal cual debajo. **No reescribas ni inventes contenido.**
-4. Actualiza la tabla de `machines/index.md` con una fila nueva
-   (máquina, dificultad, SO, técnicas clave, fecha).
+4. **No** edites `machines/index.md`: la rejilla y las estadísticas de la portada
+   se generan solas desde el front-matter (`hooks/machines.py`). Compila con
+   `py -m mkdocs build --strict` para comprobar que no falta ningún tag.
 5. Muéstrame el `git diff`. Con mi OK explícito, haz commit y push.
 6. El push dispara GitHub Actions y la web se actualiza sola en 1-2 min.
 

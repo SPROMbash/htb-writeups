@@ -53,12 +53,15 @@ flowchart LR
 ```
 htb-writeups/
 ├── machines/                  # website source (docs_dir)
-│   ├── index.md               # home page
+│   ├── index.md               # home page (grid and stats are generated)
+│   ├── about.md               # about page
 │   ├── tags.md                # tag index
 │   ├── how-it-works.md        # this explanation, on the website
 │   └── <machine>/
-│       ├── README.md          # writeup (front matter: title + tags)
+│       ├── README.md          # writeup (front matter: title, tags, date, techniques)
 │       └── images/
+├── hooks/machines.py          # build hook: front matter → machine grid, stats, Ctrl+K index
+├── overrides/                 # Material template overrides + design CSS/JS
 ├── mkdocs.yml                 # site configuration
 ├── requirements.txt           # mkdocs-material
 ├── .github/workflows/deploy.yml
@@ -67,9 +70,11 @@ htb-writeups/
 
 ### Adding a new machine
 
-1. Create `machines/<machine>/README.md` with its front matter (`title`, `tags`).
-2. Add a row to the table in `machines/index.md`.
-3. `git add`, `git commit`, `git push` — GitHub Actions does the rest.
+1. Create `machines/<machine>/README.md` with its front matter (`title`, `tags`,
+   `date`, `techniques`).
+2. Check it locally with `py -m mkdocs build --strict` (it warns if a tag is missing).
+3. `git add`, `git commit`, `git push` — GitHub Actions does the rest: the machine shows
+   up on the home grid, the stats and the Ctrl+K palette by itself.
 
 ---
 _Educational documentation. All work done in authorized lab environments._

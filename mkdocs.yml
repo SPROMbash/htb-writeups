@@ -13,18 +13,25 @@ docs_dir: machines
 theme:
   name: material
   language: es
+  # Plantillas propias (portada, cabecera de los writeups, paleta Ctrl+K) y los
+  # archivos estáticos del rediseño. Material usa lo que haya aquí antes que lo suyo.
+  custom_dir: overrides
+  font:
+    text: Montserrat          # la misma tipografía de texto que la web de Cenco
+    code: JetBrains Mono
   palette:
+    # 'custom': los colores reales se definen en overrides/assets/stylesheets/htb.css
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: black
-      accent: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-night
         name: Cambiar a modo oscuro
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: black
-      accent: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-sunny
         name: Cambiar a modo claro
@@ -44,6 +51,17 @@ theme:
 # Nota: NO definimos 'nav:' a propósito. Así MkDocs genera el menú
 # automáticamente desde la estructura de carpetas: añadir machines/<maquina>/
 # hace que aparezca sola en la web. Ese es el comportamiento "recursivo".
+
+# Hook que lee el front-matter de cada machines/<maquina>/README.md y genera la
+# rejilla, las estadísticas y el índice de la paleta Ctrl+K. Se ejecuta dentro de
+# `mkdocs build`, así que el workflow de GitHub Actions no cambia.
+hooks:
+  - hooks/machines.py
+
+extra_css:
+  - assets/stylesheets/htb.css
+extra_javascript:
+  - assets/javascripts/htb.js
 
 plugins:
   - search:

@@ -1,0 +1,71 @@
+{#-
+  Sustituye a partials/tags.html de Material.
+  - En los writeups (páginas con page.meta.htb, que rellena hooks/machines.py) pinta
+    una cabecera con badges: SO, dificultad, plataforma y fecha. Cada badge enlaza a
+    su grupo en la página de etiquetas. El texto del writeup no se toca.
+  - En el resto de páginas se comporta exactamente como el original.
+-#}
+{% if page.meta and page.meta.hide %}
+  {% set hidden = "hidden" if "tags" in page.meta.hide %}
+{% endif %}
+
+{% set urls = {} %}
+{% for tag in tags or [] %}
+  {% set _ = urls.update({tag.name: tag.url}) %}
+{% endfor %}
+
+{% macro badge(name, cls, href=None, icon=None) %}
+  {% if href %}<a href="{{ href | url }}" class="htb-badge {{ cls }}">{% else %}<span class="htb-badge {{ cls }}">{% endif %}
+    {%- if icon %}{% include ".icons/" ~ icon ~ ".svg" %}{% endif -%}
+    {{ name }}
+  {%- if href %}</a>{% else %}</span>{% endif %}
+{% endmacro %}
+
+{% if page.meta and page.meta.htb %}
+  {% set h = page.meta.htb %}
+  {% set os_icons = {
+    "Windows": "fontawesome/brands/windows",
+    "Linux": "fontawesome/brands/linux",
+    "FreeBSD": "fontawesome/brands/freebsd",
+    "Android": "fontawesome/brands/android"
+  } %}
+  <header class="htb-meta" {{ hidden }}>
+    <a class="htb-meta__back" href="{{ '' | url }}#maquinas">← Todas las máquinas</a>
+    <div class="htb-meta__badges">
+      {{ badge(h.os, "htb-badge--os", urls.get(h.os), os_icons.get(h.os, "material/server")) }}
+      {{ badge(h.difficulty, "htb-d--" ~ h.diff_class, urls.get(h.difficulty)) }}
+      {% if h.platform %}{{ badge(h.platform, "htb-badge--plain", urls.get(h.platform)) }}{% endif %}
+      <span class="htb-badge htb-badge--plain">Hack The Box</span>
+      {% if h.date %}
+        <span class="htb-badge htb-badge--plain">
+          {% include ".icons/material/calendar-blank-outline.svg" %}
+          <time datetime="{{ h.date }}">{{ h.date_label }}</time>
+        </span>
+      {% endif %}
+    </div>
+  </header>
+{% elif tags %}
+  <nav class="md-tags" {{ hidden }}>
+    {% for tag in tags %}
+      {% set class = "md-tag" %}
+      {% if tag.hidden %}
+        {% set class = class ~ " md-tag-shadow" %}
+      {% endif %}
+      {% if config.extra.tags %}
+        {% set class = class ~ " md-tag-icon" %}
+        {% if tag.name in config.extra.tags %}
+          {% set class = class ~ " md-tag--" ~ config.extra.tags[tag.name] %}
+        {% endif %}
+      {% endif %}
+      {% if tag.url %}
+        <a href="{{ tag.url | url }}" class="{{ class }}">
+          {{- tag.name -}}
+        </a>
+      {% else %}
+        <span class="{{ class }}">
+          {{- tag.name -}}
+        </span>
+      {% endif %}
+    {% endfor %}
+  </nav>
+{% endif %}

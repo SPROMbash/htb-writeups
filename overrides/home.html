@@ -1,0 +1,168 @@
+{#-
+  Portada. La activa machines/index.md con `template: home.html`.
+  Todo lo que se ve aquí sale de `htb`, el resumen que construye hooks/machines.py
+  a partir del front-matter: no hay ninguna máquina escrita a mano.
+-#}
+{% extends "main.html" %}
+
+{% set os_icons = {
+  "Windows": "fontawesome/brands/windows",
+  "Linux": "fontawesome/brands/linux",
+  "FreeBSD": "fontawesome/brands/freebsd",
+  "Android": "fontawesome/brands/android"
+} %}
+
+{% block tabs %}
+  {{ super() }}
+  <section class="htb-hero md-typeset" aria-labelledby="htb-hero-title">
+    <div class="md-grid htb-hero__inner">
+      <div class="htb-hero__text htb-reveal">
+        <p class="htb-eyebrow">~/htb-writeups $ ls machines/</p>
+        <h1 id="htb-hero-title">Hack The Box, <em>máquina a máquina</em>.</h1>
+        <div class="htb-hero__lead">{{ page.content }}</div>
+        <button class="htb-hero__search" type="button" data-htb-palette>
+          {% include ".icons/material/magnify.svg" %}
+          <span>Buscar máquina, técnica o sección…</span>
+          <kbd class="htb-kbd-shortcut">Ctrl K</kbd>
+        </button>
+        <div class="htb-hero__actions">
+          <a class="md-button md-button--primary" href="#maquinas">Ver máquinas</a>
+          {% if config.repo_url %}
+            <a class="md-button" href="{{ config.repo_url }}">
+              {% include ".icons/fontawesome/brands/github.svg" %} Repositorio
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      {% set last = htb.latest %}
+      <a class="htb-term htb-reveal" {% if last %}href="{{ last.url | url }}"{% endif %} aria-label="Última máquina publicada{% if last %}: {{ last.title }}{% endif %}">
+        <div class="htb-term__bar" aria-hidden="true"><i></i><i></i><i></i><span>última máquina</span></div>
+<pre class="htb-term__body" aria-hidden="true">{% if last %}<span class="p">$</span> head -n 6 {{ last.slug }}/README.md
+<span class="k">title:</span> {{ last.title }}
+<span class="k">tags:</span> [{{ last.os }}, {{ last.difficulty }}{% if last.platform %}, {{ last.platform }}{% endif %}]
+{% if last.date %}<span class="k">date:</span> {{ last.date }}
+{% endif %}{% if last.techniques %}
+<span class="c"># {{ last.techniques }}</span>
+{% endif %}<span class="p">$</span> <span class="htb-cursor">▋</span>{% else %}<span class="p">$</span> ls machines/
+<span class="c"># aún no hay máquinas publicadas</span>{% endif %}</pre>
+      </a>
+    </div>
+  </section>
+{% endblock %}
+
+{% block content %}
+  {#- Estadísticas -#}
+  <section class="htb-stats" aria-label="Estadísticas">
+    <div class="htb-stat htb-stat--total htb-reveal">
+      <h2 class="htb-stat__label">Máquinas</h2>
+      <p class="htb-stat__big">{{ htb.total }}</p>
+      <p class="htb-stat__sub">writeups publicados</p>
+    </div>
+
+    <div class="htb-stat htb-reveal">
+      <h2 class="htb-stat__label">Por sistema</h2>
+      <ul class="htb-bars">
+        {% for row in htb.by_os %}
+          <li><span>{{ row.name }}</span><span class="htb-bars__track"><span class="htb-bars__fill" style="--w: {{ row.pct }}%"></span></span><span class="htb-bars__n">{{ row.count }}</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="htb-stat htb-reveal">
+      <h2 class="htb-stat__label">Por dificultad</h2>
+      <ul class="htb-bars">
+        {% for row in htb.by_difficulty %}
+          <li class="htb-d--{{ row.name | lower | replace(' ', '-') }}"><span>{{ row.name }}</span><span class="htb-bars__track"><span class="htb-bars__fill" style="--w: {{ row.pct }}%"></span></span><span class="htb-bars__n">{{ row.count }}</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="htb-stat htb-stat--wide htb-reveal">
+      <h2 class="htb-stat__label">Línea de tiempo</h2>
+      {% if htb.timeline %}
+        {#- Barras por mes, todas en la misma escala (máximo = timeline_max). -#}
+        {% set W, H, pad = 320, 104, 10 %}
+        {% set base = H - 20 %}
+        {% set slot = (W - pad * 2) / (htb.timeline | length) %}
+        {% set bw = [26, slot * 0.6] | min %}
+        <svg class="htb-timeline" viewBox="0 0 {{ W }} {{ H }}" role="img"
+             aria-label="Máquinas publicadas por mes: {% for t in htb.timeline %}{{ t.label }} {{ t.count }}{{ ', ' if not loop.last }}{% endfor %}">
+          <line class="htb-timeline__axis" x1="{{ pad }}" x2="{{ W - pad }}" y1="{{ base }}" y2="{{ base }}"/>
+          {% for t in htb.timeline %}
+            {% set h = (t.count / htb.timeline_max) * (base - 18) if htb.timeline_max else 0 %}
+            {% set x = pad + slot * loop.index0 + (slot - bw) / 2 %}
+            {% if t.count %}
+              <rect class="htb-timeline__bar" x="{{ x | round(1) }}" y="{{ (base - h) | round(1) }}" width="{{ bw | round(1) }}" height="{{ h | round(1) }}" rx="3"/>
+              <text class="htb-timeline__val" x="{{ (x + bw / 2) | round(1) }}" y="{{ (base - h - 5) | round(1) }}" text-anchor="middle">{{ t.count }}</text>
+            {% endif %}
+            <text class="htb-timeline__lbl" x="{{ (x + bw / 2) | round(1) }}" y="{{ H - 5 }}" text-anchor="middle">{{ t.label }}</text>
+          {% endfor %}
+        </svg>
+      {% else %}
+        <p class="htb-stat__sub">Añade <code>date:</code> al front-matter de cada writeup para verlas en el tiempo.</p>
+      {% endif %}
+    </div>
+  </section>
+
+  {#- Rejilla filtrable -#}
+  <section class="htb-machines" id="maquinas" aria-labelledby="htb-machines-title">
+    <div class="htb-machines__head">
+      <h2 id="htb-machines-title">Máquinas</h2>
+      <p class="htb-count" data-htb-count aria-live="polite">{{ htb.total }} de {{ htb.total }} máquinas</p>
+    </div>
+
+    {% if htb.total %}
+      <div class="htb-filters" role="group" aria-label="Filtrar máquinas">
+        <div class="htb-filters__group" data-htb-filter="os">
+          <span class="htb-filters__label">SO</span>
+          <button type="button" class="htb-chip" data-value="" aria-pressed="true">Todos</button>
+          {% for row in htb.by_os %}
+            <button type="button" class="htb-chip" data-value="{{ row.name }}" aria-pressed="false">{{ row.name }}</button>
+          {% endfor %}
+        </div>
+        <div class="htb-filters__group" data-htb-filter="difficulty">
+          <span class="htb-filters__label">Dificultad</span>
+          <button type="button" class="htb-chip" data-value="" aria-pressed="true">Todas</button>
+          {% for row in htb.by_difficulty %}
+            <button type="button" class="htb-chip" data-value="{{ row.name }}" aria-pressed="false">{{ row.name }}</button>
+          {% endfor %}
+        </div>
+        <label class="htb-filters__search">
+          <span class="htb-sr">Filtrar por nombre o técnica</span>
+          <input type="search" id="htb-filter-q" placeholder="Filtrar por nombre o técnica…" autocomplete="off">
+        </label>
+      </div>
+    {% endif %}
+
+    <div class="htb-grid">
+      {% for m in htb.machines %}
+        <a class="htb-card htb-reveal" href="{{ m.url | url }}"
+           data-os="{{ m.os }}" data-difficulty="{{ m.difficulty }}"
+           data-search="{{ (m.title ~ ' ' ~ m.techniques ~ ' ' ~ m.platform) | lower }}">
+          <div class="htb-card__top">
+            <span class="htb-os">
+              {% include ".icons/" ~ os_icons.get(m.os, "material/server") ~ ".svg" %}
+              {{ m.os }}
+            </span>
+            <span class="htb-badge htb-d--{{ m.diff_class }}">{{ m.difficulty }}</span>
+          </div>
+          <h3 class="htb-card__title">{{ m.title }} <span class="htb-card__arrow" aria-hidden="true">→</span></h3>
+          {% if m.techniques %}<p class="htb-card__tech">{{ m.techniques }}</p>{% endif %}
+          <div class="htb-card__foot">
+            <span>{{ m.platform }}</span>
+            {% if m.date %}<time datetime="{{ m.date }}">{{ m.date_label }}</time>{% endif %}
+          </div>
+        </a>
+      {% endfor %}
+      <div class="htb-empty" data-htb-empty {% if htb.total %}hidden{% endif %}>
+        {% if htb.total %}
+          Ninguna máquina coincide con estos filtros.
+          <button type="button" data-htb-reset>Quitar filtros</button>
+        {% else %}
+          Todavía no hay máquinas. Crea <code>machines/&lt;maquina&gt;/README.md</code> con su front-matter y aparecerá aquí sola.
+        {% endif %}
+      </div>
+    </div>
+  </section>
+{% endblock %}

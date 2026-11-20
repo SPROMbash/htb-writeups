@@ -1,0 +1,35 @@
+{#-
+  Plantilla base de TODAS las páginas. Extiende la de Material y solo añade:
+    - la tipografía de títulos (Saira, como en Cenco)
+    - la paleta de comandos Ctrl/Cmd+K con el índice que genera hooks/machines.py
+-#}
+{% extends "base.html" %}
+
+{% block extrahead %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:wght@500;600;700&display=swap">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#faf8fd">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#110d17">
+{% endblock %}
+
+{% block scripts %}
+  {#- La paleta vive fuera del contenedor que reemplaza la navegación instantánea,
+      así que se crea una sola vez y sobrevive a los cambios de página. -#}
+  <dialog class="htb-palette" id="htb-palette" aria-label="Saltar a una máquina o sección">
+    <div class="htb-palette__field">
+      {% include ".icons/material/magnify.svg" %}
+      <input id="htb-palette-input" type="text" placeholder="Saltar a una máquina o sección…"
+             autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true"
+             aria-controls="htb-palette-list" aria-autocomplete="list">
+      <kbd>Esc</kbd>
+    </div>
+    <ul class="htb-palette__list" id="htb-palette-list" role="listbox" aria-label="Resultados"></ul>
+    <div class="htb-palette__hint">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> moverse</span>
+      <span><kbd>Enter</kbd> abrir</span>
+      <span><kbd>Esc</kbd> cerrar</span>
+    </div>
+  </dialog>
+  <script id="htb-index" type="application/json">{{ htb.index_json if htb else "[]" }}</script>
+  {{ super() }}
+{% endblock %}
