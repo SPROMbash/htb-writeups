@@ -86,7 +86,7 @@
       <p>Pulsa una celda para ver esas máquinas</p>
     </div>
     <div class="htb-matrix__scroll">
-      <table class="htb-matrix">
+      <table class="htb-matrix{{ ' htb-matrix--compact' if htb.by_difficulty | length < 4 }}">
         <thead>
           <tr>
             <th scope="col"><span class="htb-sr">Sistema operativo</span></th>

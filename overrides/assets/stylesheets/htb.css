@@ -882,3 +882,19 @@ kbd.htb-kbd-shortcut,
 
 /* Firma del autor en la cabecera del writeup */
 .htb-badge--author { color: var(--htb-accent); background: var(--htb-accent-soft); font-family: var(--htb-mono); font-weight: 500; }
+
+/* Matriz: hover sin cambiar el tamaño (antes scale(1.06) desbordaba la celda
+   cuando había pocas columnas y cada celda medía casi todo el ancho). */
+.md-typeset a.htb-matrix__cell:hover,
+.md-typeset a.htb-matrix__cell:focus-visible {
+  transform: none;
+  box-shadow: inset 0 0 0 2px var(--htb-accent-strong);
+  filter: brightness(1.08);
+}
+/* Con pocas dificultades la tabla no se estira a todo el ancho */
+.md-typeset table.htb-matrix--compact { width: auto; }
+.md-typeset table.htb-matrix--compact .htb-matrix__cell { min-width: 5.5rem; }
+/* En tablas de ancho automático, una columna al 1 % obliga a estirar la tabla
+   (60 px = 1 % → tabla enorme). En la versión compacta la dejamos en automático. */
+.md-typeset table.htb-matrix--compact tbody th,
+.md-typeset table.htb-matrix--compact thead th:first-child { width: auto; }
