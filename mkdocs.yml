@@ -1,6 +1,6 @@
 site_name: HTB Writeups — SpromBash
 site_description: Writeups de máquinas de Hack The Box (Starting Point y retiradas).
-site_author: Tecén Díaz Quintana
+site_author: SpromBash
 site_url: https://sprombash.github.io/htb-writeups/
 
 repo_name: SpromBash/htb-writeups   # solo la etiqueta visible; la URL real va en repo_url
