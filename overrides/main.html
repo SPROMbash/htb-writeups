@@ -1,7 +1,8 @@
 {#-
   Plantilla base de TODAS las páginas. Extiende la de Material y solo añade:
     - la tipografía de títulos (Saira, como en Cenco)
-    - la paleta de comandos Ctrl/Cmd+K con el índice que genera hooks/machines.py
+    - la paleta de comandos Ctrl/Cmd+K (su índice, htb-index.json, lo genera
+      hooks/machines.py y htb.js lo descarga una sola vez)
 -#}
 {% extends "base.html" %}
 
@@ -30,6 +31,5 @@
       <span><kbd>Esc</kbd> cerrar</span>
     </div>
   </dialog>
-  <script id="htb-index" type="application/json">{{ htb.index_json if htb else "[]" }}</script>
   {{ super() }}
 {% endblock %}

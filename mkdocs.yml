@@ -39,6 +39,7 @@ theme:
     - navigation.instant      # carga instantánea (SPA)
     - navigation.tracking
     - navigation.indexes      # permite que README.md sea el índice de cada máquina
+    - navigation.prune        # el menú lateral solo incluye el grupo abierto (escala a cientos de máquinas)
     - navigation.top
     - toc.follow
     - search.suggest

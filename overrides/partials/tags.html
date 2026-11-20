@@ -1,21 +1,16 @@
 {#-
   Sustituye a partials/tags.html de Material.
   - En los writeups (páginas con page.meta.htb, que rellena hooks/machines.py) pinta
-    una cabecera con badges: SO, dificultad, plataforma y fecha. Cada badge enlaza a
-    su grupo en la página de etiquetas. El texto del writeup no se toca.
+    una cabecera con badges: SO, dificultad, plataforma y fecha. Cada badge abre la
+    rejilla de la portada ya filtrada por ese valor. El texto del writeup no se toca.
   - En el resto de páginas se comporta exactamente como el original.
 -#}
 {% if page.meta and page.meta.hide %}
   {% set hidden = "hidden" if "tags" in page.meta.hide %}
 {% endif %}
 
-{% set urls = {} %}
-{% for tag in tags or [] %}
-  {% set _ = urls.update({tag.name: tag.url}) %}
-{% endfor %}
-
 {% macro badge(name, cls, href=None, icon=None) %}
-  {% if href %}<a href="{{ href | url }}" class="htb-badge {{ cls }}">{% else %}<span class="htb-badge {{ cls }}">{% endif %}
+  {% if href %}<a href="{{ href }}" class="htb-badge {{ cls }}">{% else %}<span class="htb-badge {{ cls }}">{% endif %}
     {%- if icon %}{% include ".icons/" ~ icon ~ ".svg" %}{% endif -%}
     {{ name }}
   {%- if href %}</a>{% else %}</span>{% endif %}
@@ -29,12 +24,14 @@
     "FreeBSD": "fontawesome/brands/freebsd",
     "Android": "fontawesome/brands/android"
   } %}
+  {% set home = '' | url %}
+  {% set home = home if home.endswith('/') else home ~ '/' %}
   <header class="htb-meta" {{ hidden }}>
-    <a class="htb-meta__back" href="{{ '' | url }}#maquinas">← Todas las máquinas</a>
+    <a class="htb-meta__back" href="{{ home }}#maquinas">← Todas las máquinas</a>
     <div class="htb-meta__badges">
-      {{ badge(h.os, "htb-badge--os", urls.get(h.os), os_icons.get(h.os, "material/server")) }}
-      {{ badge(h.difficulty, "htb-d--" ~ h.diff_class, urls.get(h.difficulty)) }}
-      {% if h.platform %}{{ badge(h.platform, "htb-badge--plain", urls.get(h.platform)) }}{% endif %}
+      {{ badge(h.os, "htb-badge--os", home ~ '?os=' ~ (h.os | urlencode) ~ '#maquinas', os_icons.get(h.os, "material/server")) }}
+      {{ badge(h.difficulty, "htb-d--" ~ h.diff_class, home ~ '?difficulty=' ~ (h.difficulty | urlencode) ~ '#maquinas') }}
+      {% if h.platform %}{{ badge(h.platform, "htb-badge--plain", home ~ '?q=' ~ (h.platform | urlencode) ~ '#maquinas') }}{% endif %}
       <span class="htb-badge htb-badge--plain">Hack The Box</span>
       {% if h.date %}
         <span class="htb-badge htb-badge--plain">

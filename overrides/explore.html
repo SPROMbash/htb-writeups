@@ -1,0 +1,136 @@
+{#-
+  Página de etiquetas, en versión visual. La activa machines/tags.md con
+  `template: explore.html`. Todo sale de `htb` (hooks/machines.py); cada bloque
+  enlaza a la rejilla de la portada ya filtrada (?os=, ?difficulty=, ?q=).
+-#}
+{% extends "main.html" %}
+
+{% set os_icons = {
+  "Windows": "fontawesome/brands/windows",
+  "Linux": "fontawesome/brands/linux",
+  "FreeBSD": "fontawesome/brands/freebsd",
+  "Android": "fontawesome/brands/android"
+} %}
+
+{% block content %}
+  {% set home = '' | url %}
+  {% set home = home if home.endswith('/') else home ~ '/' %}
+
+  <header class="htb-explore__head htb-reveal">
+    <p class="htb-eyebrow">~/htb-writeups $ grep -rh "tags:" machines/ | sort | uniq -c</p>
+    <div class="htb-explore__intro">{{ page.content }}</div>
+  </header>
+
+  {% if not htb.total %}
+    <p class="htb-empty">Todavía no hay máquinas con etiquetas.</p>
+  {% else %}
+
+  {#- Espectro de dificultad: una barra al 100 % dividida por dificultad -#}
+  <section class="htb-explore__block htb-reveal" aria-labelledby="ex-spectrum">
+    <div class="htb-explore__title">
+      <h2 id="ex-spectrum">Espectro de dificultad</h2>
+      <p>{{ htb.total }} máquinas</p>
+    </div>
+    <div class="htb-spectrum" role="list">
+      {% for d in htb.by_difficulty %}
+        <a role="listitem" class="htb-spectrum__seg htb-d--{{ d.diff_class }}" style="flex-grow: {{ d.count }}"
+           href="{{ home }}?difficulty={{ d.name | urlencode }}#maquinas"
+           title="{{ d.name }}: {{ d.count }} ({{ d.pct }} %)">
+          <span class="htb-sr">{{ d.name }}: {{ d.count }}</span>
+        </a>
+      {% endfor %}
+    </div>
+    <ul class="htb-spectrum__legend">
+      {% for d in htb.by_difficulty %}
+        <li class="htb-d--{{ d.diff_class }}"><i aria-hidden="true"></i>{{ d.name }} <b>{{ d.pct | round(0) | int }} %</b></li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <div class="htb-explore__cols">
+    {#- Sistema operativo -#}
+    <section class="htb-explore__block htb-reveal" aria-labelledby="ex-os">
+      <div class="htb-explore__title"><h2 id="ex-os">Sistema operativo</h2></div>
+      <div class="htb-tiles">
+        {% for o in htb.by_os %}
+          <a class="htb-tile" href="{{ home }}?os={{ o.name | urlencode }}#maquinas">
+            <span class="htb-tile__icon">{% include ".icons/" ~ os_icons.get(o.name, "material/server") ~ ".svg" %}</span>
+            <span class="htb-tile__name">{{ o.name }}</span>
+            <span class="htb-tile__count">{{ o.count }}</span>
+            <span class="htb-tile__bar"><span style="--w: {{ o.pct }}%"></span></span>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+
+    {#- Plataforma -#}
+    <section class="htb-explore__block htb-reveal" aria-labelledby="ex-platform">
+      <div class="htb-explore__title"><h2 id="ex-platform">Plataforma</h2></div>
+      <div class="htb-tiles htb-tiles--wide">
+        {% for pl in htb.by_platform %}
+          <a class="htb-tile" href="{{ home }}?q={{ pl.name | urlencode }}#maquinas">
+            <span class="htb-tile__icon">{% include ".icons/" ~ ("material/school-outline" if pl.name == "Starting Point" else "material/archive-outline") ~ ".svg" %}</span>
+            <span class="htb-tile__name">{{ pl.name }}</span>
+            <span class="htb-tile__count">{{ pl.count }}</span>
+            <span class="htb-tile__bar"><span style="--w: {{ pl.pct }}%"></span></span>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  {#- Matriz SO × dificultad -#}
+  <section class="htb-explore__block htb-reveal" aria-labelledby="ex-matrix">
+    <div class="htb-explore__title">
+      <h2 id="ex-matrix">SO × dificultad</h2>
+      <p>Pulsa una celda para ver esas máquinas</p>
+    </div>
+    <div class="htb-matrix__scroll">
+      <table class="htb-matrix">
+        <thead>
+          <tr>
+            <th scope="col"><span class="htb-sr">Sistema operativo</span></th>
+            {% for d in htb.by_difficulty %}<th scope="col"><span class="htb-matrix__dot htb-d--{{ d.diff_class }}"></span>{{ d.name }}</th>{% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in htb.matrix %}
+            <tr>
+              <th scope="row">{{ row.os }}</th>
+              {% for c in row.cells %}
+                <td>
+                  {% if c.count %}
+                    <a class="htb-matrix__cell" data-level="{{ c.level }}"
+                       href="{{ home }}?os={{ row.os | urlencode }}&amp;difficulty={{ c.difficulty | urlencode }}#maquinas"
+                       title="{{ row.os }} · {{ c.difficulty }}: {{ c.count }}">{{ c.count }}</a>
+                  {% else %}
+                    <span class="htb-matrix__cell" data-level="0" aria-label="ninguna">·</span>
+                  {% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {#- Técnicas -#}
+  <section class="htb-explore__block htb-reveal" aria-labelledby="ex-tech">
+    <div class="htb-explore__title">
+      <h2 id="ex-tech">Técnicas</h2>
+      <p>{% if htb.technique_total > htb.techniques | length %}Las {{ htb.techniques | length }} más frecuentes de {{ htb.technique_total }}{% else %}{{ htb.technique_total }} técnicas{% endif %}</p>
+    </div>
+    {% if htb.techniques %}
+      <ul class="htb-cloud">
+        {% for t in htb.techniques %}
+          <li><a class="htb-cloud__tag" data-level="{{ t.level }}" href="{{ home }}?q={{ t.name | urlencode }}#maquinas">{{ t.name }}<b>{{ t.count }}</b></a></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="htb-stat__sub">Añade <code>techniques:</code> al front-matter de los writeups para verlas aquí.</p>
+    {% endif %}
+  </section>
+
+  {% endif %}
+{% endblock %}

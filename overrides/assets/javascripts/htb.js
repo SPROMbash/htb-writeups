@@ -47,10 +47,19 @@
     const input = $('#htb-palette-input');
     const list = $('#htb-palette-list');
 
-    let items = [];
-    try { items = JSON.parse($('#htb-index').textContent); } catch (e) { items = []; }
-    items = items.map((i) => ({ ...i, href: new URL(i.url, siteRoot), hay: norm(`${i.label} ${i.meta} ${i.keywords}`) }));
-    items.push({ kind: 'Acción', label: 'Cambiar tema claro / oscuro', meta: '', hay: 'tema claro oscuro modo dark light theme', run: toggleTheme });
+    /* El índice (htb-index.json) lo genera el hook. Se descarga UNA vez, en un
+       momento libre tras cargar la página, en vez de ir dentro de cada página. */
+    const actions = [{ kind: 'Acción', label: 'Cambiar tema claro / oscuro', meta: '', hay: 'tema claro oscuro modo dark light theme', run: toggleTheme }];
+    let items = actions.slice();
+    let loading = null;
+    const loadIndex = () => loading || (loading = fetch(new URL('htb-index.json', siteRoot))
+      .then((r) => (r.ok ? r.json() : []))
+      .catch(() => [])
+      .then((data) => {
+        items = data.map((i) => ({ ...i, href: new URL(i.url, siteRoot), hay: norm(`${i.label} ${i.meta} ${i.keywords}`) })).concat(actions);
+        if (dialog.open) draw();
+      }));
+    (window.requestIdleCallback || ((fn) => setTimeout(fn, 1500)))(loadIndex);
 
     let shown = [];
     let sel = 0;
@@ -76,7 +85,7 @@
               <span class="htb-palette__kind">${esc(i.kind)}</span>
               <span class="htb-palette__label">${i.kind === 'Texto' ? esc(i.label) : highlight(i.label, words[0] || '')}</span>
               <span class="htb-palette__meta">${esc(i.meta || '')}</span></li>`).join('')
-        : '<li aria-disabled="true">Escribe para buscar</li>';
+        : `<li aria-disabled="true">${items.length <= actions.length ? 'Cargando índice…' : 'Escribe para buscar'}</li>`;
       input.setAttribute('aria-activedescendant', shown.length ? `htb-opt-${sel}` : '');
       const active = list.querySelector('[aria-selected="true"]');
       if (active) active.scrollIntoView({ block: 'nearest' });
@@ -90,6 +99,7 @@
 
     const open = (prefill = '') => {
       if (dialog.open) return;
+      loadIndex();
       opener = document.activeElement;
       input.value = prefill;
       sel = 0;
@@ -178,7 +188,7 @@
 
   /* =================== POR PÁGINA =================== */
 
-  // Filtros en vivo de la portada
+  // Filtros en vivo de la portada (+ paginación "Mostrar más" y filtros desde la URL)
   function setupFilters() {
     const grid = $('.htb-grid');
     if (!grid) return;
@@ -186,19 +196,44 @@
     const empty = $('[data-htb-empty]', grid);
     const count = $('[data-htb-count]');
     const search = $('#htb-filter-q');
+    const more = $('[data-htb-more]');
+    const pageSize = Number(more && more.dataset.pageSize) || 24;
     const state = { os: '', difficulty: '', q: '' };
+    let limit = pageSize;
 
+    const plural = (n) => `${n} máquina${n === 1 ? '' : 's'}`;
     const apply = () => {
-      let visible = 0;
+      const filtered = Boolean(state.os || state.difficulty || state.q);
+      let matches = 0;
       cards.forEach((card) => {
         const ok = (!state.os || card.dataset.os === state.os) &&
           (!state.difficulty || card.dataset.difficulty === state.difficulty) &&
           (!state.q || norm(card.dataset.search).includes(state.q));
-        card.hidden = !ok;
-        if (ok) { visible += 1; card.classList.add('is-in'); }
+        const show = ok && matches < limit;
+        if (ok) matches += 1;
+        card.hidden = !show;
+        if (show) card.classList.add('is-in');
       });
-      if (empty && cards.length) empty.hidden = visible > 0;
-      if (count) count.textContent = `${visible} de ${cards.length} máquina${cards.length === 1 ? '' : 's'}`;
+      const shown = Math.min(matches, limit);
+      if (empty && cards.length) empty.hidden = matches > 0;
+      if (count) {
+        count.textContent = shown < matches
+          ? `Mostrando ${shown} de ${plural(matches)}${filtered ? ` · ${cards.length} en total` : ''}`
+          : `${matches} de ${plural(cards.length)}`;
+      }
+      if (more) {
+        const rest = matches - shown;
+        more.hidden = rest <= 0;
+        more.querySelector('button').textContent = `Mostrar ${Math.min(pageSize, rest)} más · quedan ${rest}`;
+      }
+    };
+    const refilter = () => { limit = pageSize; apply(); };
+
+    const press = (group, value) => {
+      const chips = $$('.htb-chip', group);
+      const target = chips.find((c) => c.dataset.value === value) || chips[0];
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c === target)));
+      return target.dataset.value;
     };
 
     $$('[data-htb-filter]').forEach((group) => {
@@ -206,20 +241,39 @@
       group.addEventListener('click', (e) => {
         const chip = e.target.closest('.htb-chip');
         if (!chip) return;
-        state[key] = chip.dataset.value;
-        $$('.htb-chip', group).forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
-        apply();
+        state[key] = press(group, chip.dataset.value);
+        refilter();
       });
     });
-    if (search) search.addEventListener('input', () => { state.q = norm(search.value.trim()); apply(); });
+    if (search) search.addEventListener('input', () => { state.q = norm(search.value.trim()); refilter(); });
+
+    if (more) more.querySelector('button').addEventListener('click', () => {
+      // Al mostrar más, el foco pasa a la primera tarjeta nueva (útil con teclado).
+      const before = cards.filter((c) => !c.hidden).length;
+      limit += pageSize;
+      apply();
+      const next = cards.filter((c) => !c.hidden)[before];
+      if (next) next.focus({ preventScroll: true });
+    });
 
     const reset = $('[data-htb-reset]', grid);
     if (reset) reset.addEventListener('click', () => {
       state.os = state.difficulty = state.q = '';
       if (search) search.value = '';
-      $$('[data-htb-filter]').forEach((g) => $$('.htb-chip', g).forEach((c, i) => c.setAttribute('aria-pressed', String(i === 0))));
-      apply();
+      $$('[data-htb-filter]').forEach((g) => press(g, ''));
+      refilter();
     });
+
+    // Filtros que llegan en la URL desde Etiquetas o los badges: ?os=Linux&difficulty=Hard&q=ssh
+    const params = new URLSearchParams(location.search);
+    $$('[data-htb-filter]').forEach((group) => {
+      const key = group.dataset.htbFilter;
+      if (params.has(key)) state[key] = press(group, params.get(key));
+    });
+    if (params.has('q') && search) {
+      search.value = params.get('q');
+      state.q = norm(search.value.trim());
+    }
     apply();
   }
 

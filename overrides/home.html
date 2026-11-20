@@ -79,24 +79,34 @@
     </div>
 
     <div class="htb-stat htb-stat--wide htb-reveal">
-      <h2 class="htb-stat__label">Línea de tiempo</h2>
-      {% if htb.timeline %}
-        {#- Barras por mes, todas en la misma escala (máximo = timeline_max). -#}
-        {% set W, H, pad = 320, 104, 10 %}
-        {% set base = H - 20 %}
-        {% set slot = (W - pad * 2) / (htb.timeline | length) %}
-        {% set bw = [26, slot * 0.6] | min %}
+      {% set tl = htb.timeline %}
+      <h2 class="htb-stat__label">Línea de tiempo{% if tl.unit %} · por {{ tl.unit }}{% endif %}</h2>
+      {% if tl.buckets %}
+        {#- Barras en una misma escala (máximo = tl.max). La unidad (mes, trimestre
+            o año) la elige el hook según el rango de fechas, para que nunca se amontonen. -#}
+        {% set W, H, pad = 320, 112, 8 %}
+        {% set base = H - 28 %}
+        {% set n = tl.buckets | length %}
+        {% set slot = (W - pad * 2) / n %}
+        {% set bw = [26, slot * 0.62] | min %}
+        {% set show_values = n <= 14 %}
         <svg class="htb-timeline" viewBox="0 0 {{ W }} {{ H }}" role="img"
-             aria-label="Máquinas publicadas por mes: {% for t in htb.timeline %}{{ t.label }} {{ t.count }}{{ ', ' if not loop.last }}{% endfor %}">
+             aria-label="Máquinas publicadas por {{ tl.unit }}: {% for t in tl.buckets %}{{ t.full }} {{ t.count }}{{ ', ' if not loop.last }}{% endfor %}">
           <line class="htb-timeline__axis" x1="{{ pad }}" x2="{{ W - pad }}" y1="{{ base }}" y2="{{ base }}"/>
-          {% for t in htb.timeline %}
-            {% set h = (t.count / htb.timeline_max) * (base - 18) if htb.timeline_max else 0 %}
+          {% for t in tl.buckets %}
+            {% set h = (t.count / tl.max) * (base - 16) if tl.max else 0 %}
             {% set x = pad + slot * loop.index0 + (slot - bw) / 2 %}
-            {% if t.count %}
-              <rect class="htb-timeline__bar" x="{{ x | round(1) }}" y="{{ (base - h) | round(1) }}" width="{{ bw | round(1) }}" height="{{ h | round(1) }}" rx="3"/>
-              <text class="htb-timeline__val" x="{{ (x + bw / 2) | round(1) }}" y="{{ (base - h - 5) | round(1) }}" text-anchor="middle">{{ t.count }}</text>
-            {% endif %}
-            <text class="htb-timeline__lbl" x="{{ (x + bw / 2) | round(1) }}" y="{{ H - 5 }}" text-anchor="middle">{{ t.label }}</text>
+            {% set cx = (x + bw / 2) | round(1) %}
+            <g class="htb-timeline__item">
+              <title>{{ t.full }}: {{ t.count }} máquina{{ 's' if t.count != 1 }}</title>
+              <rect class="htb-timeline__hit" x="{{ (pad + slot * loop.index0) | round(1) }}" y="0" width="{{ slot | round(1) }}" height="{{ base }}"/>
+              {% if t.count %}
+                <rect class="htb-timeline__bar" x="{{ x | round(1) }}" y="{{ (base - h) | round(1) }}" width="{{ bw | round(1) }}" height="{{ h | round(1) }}" rx="2"/>
+                {% if show_values %}<text class="htb-timeline__val" x="{{ cx }}" y="{{ (base - h - 4) | round(1) }}" text-anchor="middle">{{ t.count }}</text>{% endif %}
+              {% endif %}
+              <text class="htb-timeline__lbl" x="{{ cx }}" y="{{ base + 12 }}" text-anchor="middle">{{ t.label }}</text>
+              {% if t.sub %}<text class="htb-timeline__sub" x="{{ (pad + slot * loop.index0 + 1) | round(1) }}" y="{{ base + 24 }}">{{ t.sub }}</text>{% endif %}
+            </g>
           {% endfor %}
         </svg>
       {% else %}
@@ -135,6 +145,16 @@
       </div>
     {% endif %}
 
+    {#- Sprite SVG: cada icono de SO se define UNA vez y las tarjetas lo reutilizan
+        con <use>. Con cientos de máquinas ahorra cerca de 1 MB de HTML.
+        Se usa xlink:href (no href) porque la navegación instantánea de Material
+        reescribe los atributos href y en <use> son de solo lectura. -#}
+    <svg class="htb-sprite" aria-hidden="true" focusable="false">
+      {% for o in htb.by_os %}
+        <g id="htb-ico-{{ o.name | lower }}">{% include ".icons/" ~ os_icons.get(o.name, "material/server") ~ ".svg" %}</g>
+      {% endfor %}
+    </svg>
+
     <div class="htb-grid">
       {% for m in htb.machines %}
         <a class="htb-card htb-reveal" href="{{ m.url | url }}"
@@ -142,7 +162,7 @@
            data-search="{{ (m.title ~ ' ' ~ m.techniques ~ ' ' ~ m.platform) | lower }}">
           <div class="htb-card__top">
             <span class="htb-os">
-              {% include ".icons/" ~ os_icons.get(m.os, "material/server") ~ ".svg" %}
+              <svg aria-hidden="true"><use xlink:href="#htb-ico-{{ m.os | lower }}"/></svg>
               {{ m.os }}
             </span>
             <span class="htb-badge htb-d--{{ m.diff_class }}">{{ m.difficulty }}</span>
@@ -163,6 +183,10 @@
           Todavía no hay máquinas. Crea <code>machines/&lt;maquina&gt;/README.md</code> con su front-matter y aparecerá aquí sola.
         {% endif %}
       </div>
+    </div>
+    {#- Sin JS se ven todas; con JS se muestran de {{ htb.page_size }} en {{ htb.page_size }}. -#}
+    <div class="htb-more" data-htb-more data-page-size="{{ htb.page_size }}" hidden>
+      <button type="button" class="md-button">Mostrar más</button>
     </div>
   </section>
 {% endblock %}
